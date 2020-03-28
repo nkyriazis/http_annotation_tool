@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Progress</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Annotation progress</h2>
+        <div class="progress">
+            <div class="progress-bar progress-bar-success" role="progressbar"
+                style="width:{{'%0.2f' % (100 * completed / total)}}%">
+                {{completed}} completed
+            </div>
+            <div class="progress-bar progress-bar-warning" role="progressbar"
+                style="width:{{'%0.2f' % (100 * pending / total)}}%">
+                {{pending}} pending
+            </div>
+            <div class="progress-bar progress-bar-danger" role="progressbar"
+                style="width:{{'%0.2f' % (100 * available / total)}}%">
+                {{available}} remaining
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
