@@ -106,12 +106,14 @@
         <div class="row">
             <form method="post" id="annotation">
                 <div class="col-50">
-                    <button type="submit" name="answer" value='{"cluster":{{cluster_index}}, "has_object": 1}'>There's
-                        an object</button>
+                    <button accesskey="o" type="submit" name="answer"
+                        value='{"cluster":{{cluster_index}}, "has_object": 1}'>There's
+                        an object (alt-o)</button>
                 </div>
                 <div class="col-50">
-                    <button type="submit" name="answer" value='{"cluster":{{cluster_index}}, "has_object" :0}'>It's just
-                        a hand</button>
+                    <button accesskey="h" type="submit" name="answer"
+                        value='{"cluster":{{cluster_index}}, "has_object" :0}'>It's just
+                        a hand (alt-h)</button>
                 </div>
             </form>
         </div>
@@ -125,22 +127,5 @@
 
 </body>
 
-
-<body>
-    <di>
-
-        <!-- <form method="post" id="form">
-        <label for="num">Enter Number : </label>
-        <input type="text" id="num" name="number" autofocus autocomplete="off">
-        <button>Post</button>
-    </form>
-    <p id="square"></p>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script>
-        $(' #form').on('submit', function (e) { var number=$('#num').val(); e.preventDefault(); $.ajax({
-                    url: 'http://139.91.185.84:12346/square/' , data: { 'number' : number }, method: 'POST' , success:
-                    function (data) { $('#num').val(''); $('#square').html('Square of ' + number + ' is ' + data['
-                    square']) } }); }); </script> -->
-</body>
 
 </html>
