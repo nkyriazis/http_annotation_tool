@@ -6,8 +6,16 @@ from collections import Counter
 from json2html import *  # noqa F703
 from functools import wraps
 import git
+import os
+from flask_basicauth import BasicAuth
 
 app = Flask(__name__)
+
+app.config["BASIC_AUTH_USERNAME"] = "block"
+app.config["BASIC_AUTH_PASSWORD"] = "anauthorised"
+
+basic_auth = BasicAuth(app)
+
 
 # A schema for the kind of jobs we're deaing with
 Jobs = Sequence[Mapping[str, Union[Sequence[int], str, int]]]
@@ -17,7 +25,23 @@ def get_images(cluster: Sequence[int]) -> Sequence[str]:
     return ["static/rgb/{:08d}.jpg".format(i) for i in cluster]
 
 
+def get_repo() -> git.Repo:
+    if not os.path.exists(".backup"):
+        os.mkdir(".backup")
+    try:
+        repo = git.Repo(".backup")
+    except:
+        git.Repo.init(".backup")
+        repo = git.Repo(".backup")
+    return repo
+
+
 def jobs_access(reads: bool = True, writes: bool = False):
+    "(reads, writes)"
+    access = {(True, True): "r+", (False, True): "w", (True, False): "r"}[
+        (reads, writes)
+    ]
+
     def reads_or_writes_jobs(fn: Callable) -> Callable:
         """
         Jobs are loaded and passed into the delegate as a python object.
@@ -28,7 +52,7 @@ def jobs_access(reads: bool = True, writes: bool = False):
         @wraps(fn)
         def function(*args, **kwargs):
             # atomic operation
-            with Lock("backup/jobs.json", "w" if writes and not reads else "r+") as f:
+            with Lock(".backup/jobs.json", access) as f:
                 if reads:
                     # read, or create an empty one
                     try:
@@ -50,7 +74,7 @@ def jobs_access(reads: bool = True, writes: bool = False):
                     f.truncate()
 
                     # update git, for backup
-                    repo = git.Repo("backup")
+                    repo = get_repo()
                     repo.index.add("jobs.json")
                     repo.index.commit(
                         "Changed due to '{}' from {}".format(
@@ -67,6 +91,7 @@ def jobs_access(reads: bool = True, writes: bool = False):
 
 
 @app.route("/reset")
+@basic_auth.required
 @jobs_access(reads=False, writes=True)
 def reset(jobs: Jobs) -> str:
     clusters = json.load(open("clusters.json"))
@@ -81,6 +106,7 @@ def reset(jobs: Jobs) -> str:
 
 
 @app.route("/view")
+@basic_auth.required
 @jobs_access(reads=True, writes=False)
 def view(jobs: Jobs) -> str:
     # render them
@@ -104,6 +130,7 @@ def progress(jobs: Jobs) -> str:
 
 
 @app.route("/reclaim")
+@basic_auth.required
 @jobs_access(reads=True, writes=True)
 def reclaim(jobs: Jobs) -> str:
     # start reclaiming pending jobs
@@ -159,12 +186,17 @@ def main(jobs: Jobs):
     return ret
 
 
-if __name__ == "__main__":
-    # make sure there is a backup git repo, under backup
-    try:
-        git.Repo("backup")
-    except:
-        git.Repo.init("backup")
-        git.Repo("backup")
+@app.route("/tag", methods=["GET"])
+@basic_auth.required
+def tag() -> str:
+    if "value" not in request.args:
+        return "You need to specify a value argument, with the name of the tag to add"
+    else:
+        repo = get_repo()
+        repo.create_tag(request.args["value"])
+        return "Added tag '{}' to latest commit".format(request.args["value"])
 
+
+if __name__ == "__main__":
+    get_repo()
     app.run(debug=True, host="0.0.0.0", port=12346)
