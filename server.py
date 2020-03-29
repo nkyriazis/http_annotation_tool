@@ -28,7 +28,7 @@ def jobs_access(reads: bool = True, writes: bool = False):
         @wraps(fn)
         def function(*args, **kwargs):
             # atomic operation
-            with Lock("backup/jobs.json", "r+") as f:
+            with Lock("backup/jobs.json", "w" if writes and not reads else "r+") as f:
                 if reads:
                     # read, or create an empty one
                     try:
