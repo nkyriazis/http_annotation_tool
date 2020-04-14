@@ -1,0 +1,6 @@
+Flask
+Flask-BasicAuth
+GitPython
+tqdm
+json2html
+portalocker
